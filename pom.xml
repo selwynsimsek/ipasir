@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.liveontologies</groupId>
+		<artifactId>jna-build-helper</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ipasir-parent</artifactId>
+	<packaging>pom</packaging>
+
+	<name>Native libraries for IPASIR</name>
+
+	<description>This library provides native shared libraries of propositional satisfiability (SAT) solvers that implement the Reentrant Incremental Sat solver API (reverse: IPASIR). This libraries are compiled and packaged so that they can be conveniently used by the Java Native Acces (JNA) library.</description>
+
+	<modules>
+		<module>ipasir-minisat</module>
+		<module>ipasir-picosat</module>
+	</modules>
+
+	<scm>
+		<connection>scm:git:https://github.com/liveontologies/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:git@github.com:liveontologies/${project.artifactId}.git</developerConnection>
+		<url>https://github.com/liveontologies/${project.artifactId}</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>IPASIR License</name>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Live Ontologies Project</name>
+		<url>https://github.com/liveontologies</url>
+	</organization>
+
+	<inceptionYear>2020</inceptionYear>
+
+	<developers>
+		<developer>
+			<id>yevgeny</id>
+			<name>Yevgeny Kazakov</name>
+			<email>yevgeny.kazakov@uni-ulm.de</email>
+			<organization>Institute of Artificial Intelligence, University of Ulm</organization>
+			<organizationUrl>http://www.uni-ulm.de/en/in/ki.html</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>1</timezone>
+		</developer>
+	</developers>
+
+</project>
