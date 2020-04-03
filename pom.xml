@@ -22,6 +22,8 @@
 		<module>ipasir-picosat</module>
 	</modules>
 
+	<url>https://github.com/liveontologies/${project.artifactId}</url>
+
 	<scm>
 		<connection>scm:git:https://github.com/liveontologies/${project.artifactId}.git</connection>
 		<developerConnection>scm:git:git@github.com:liveontologies/${project.artifactId}.git</developerConnection>
@@ -32,6 +34,8 @@
 	<licenses>
 		<license>
 			<name>IPASIR License</name>
+			<url>https://github.com/biotomas/ipasir/blob/master/LICENSE</url>
+			<distribution>repo</distribution>
 		</license>
 	</licenses>
 
