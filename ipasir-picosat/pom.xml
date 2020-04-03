@@ -15,4 +15,12 @@
 	<name>Native shared library for PicoSAT</name>
 	<description>Native shared library for the PicoSAT solver that implements the IPASIR C interface for incremental SAT solving</description>
 
+	<licenses>
+		<license>
+			<name>PicoSAT License</name>
+			<url>http://fmv.jku.at/picosat/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
 </project>
