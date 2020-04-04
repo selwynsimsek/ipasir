@@ -21,8 +21,8 @@ TARGET=dlib
 
 CXX=g++
 
-CXXFLAGS=-std=c++11 -Wall -DNDEBUG -O3 -fPIC
-export CXXFLAGS
+CFLAGS=-std=c++11 -Wall -DNDEBUG -O3 -fPIC
+export CFLAGS
 
 #-----------------------------------------------------------------------#
 #- REQUIRED TOP RULES --------------------------------------------------#
@@ -53,11 +53,11 @@ dlib: $(DLIB)
 
 # shared library for Mac OS
 lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a
-	$(CXX) $(CXXFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
+	$(CXX) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
 
 # shared library for Linux
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
-	$(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
+	$(CXX) $(CFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
 
 # static library with the glue code
 libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
@@ -68,7 +68,7 @@ libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
 	ar r $@ ipasir$(NAME)glue.o
 
 lib$(SIG).dylib: libipasir$(SIG).a ipasir$(NAME)glue.o
-	$(CXX) $(CXXFLAGS) -g -I. -dynamiclib -install_name lib$(NAME).dylib -o $@ $^
+	$(CXX) $(CFLAGS) -g -I. -dynamiclib -install_name lib$(NAME).dylib -o $@ $^
 
 lib$(SIG).a: $(DIR) $(DIR).patch
 	@# apply patch for set_terminate and learn_callback
@@ -106,7 +106,7 @@ $(DIR).tgz:
 #-----------------------------------------------------------------------#
 
 ipasir$(NAME)glue.o: ipasir$(NAME)glue.cc ipasir.h makefile lib$(SIG).a
-	$(CXX) -std=c++11 $(CXXLAGS) \
+	$(CXX) -std=c++11 $(CFLAGS) \
 	  -DVERSION=\"$(VERSION)\" \
 	  -I$(DIR) -I$(DIR)/core -c ipasir$(NAME)glue.cc
 
