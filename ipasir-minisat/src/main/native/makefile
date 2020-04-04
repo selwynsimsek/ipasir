@@ -86,7 +86,7 @@ lib$(SIG).a:
 	@#
 	@# apply patch for set_terminate and learn_callback
 	@#
-	patch -p0 < minisat-220.patch
+	patch -p0 < $(DIR).patch
 	@#
 	@# patch verbose output
 	@#
