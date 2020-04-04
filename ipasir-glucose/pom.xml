@@ -12,8 +12,8 @@
 	<artifactId>ipasir-glucose</artifactId>
 	<packaging>pom</packaging>
 
-	<name>Native shared library for MiniSat</name>
-	<description>Native shared library for the MiniSat solver that implements the IPASIR C interface for incremental SAT solving</description>
+	<name>Native shared library for Glucose</name>
+	<description>Native shared library for the Glucose SAT solver that implements the IPASIR C interface for incremental SAT solving</description>
 
 	<licenses>
 		<license>
