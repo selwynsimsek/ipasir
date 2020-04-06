@@ -32,6 +32,8 @@ TARGET	?= dlib
 export CXX 		?= g++
 export AR		?= ar
 export CXXFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
+# zlib is not provided for mingw32
+ZLIB_VERSION	?= 1.2.11
 
 #-----------------------------------------------------------------------#
 #- REQUIRED TOP RULES --------------------------------------------------#
@@ -40,7 +42,7 @@ export CXXFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
 all: $(TARGET)
 
 clean:
-	rm -rf $(DIR)
+	rm -rf $(DIR) zlib-$(ZLIB_VERSION)
 	rm -f *.o *.a *.dylib *.so
 
 #-----------------------------------------------------------------------#
@@ -54,15 +56,30 @@ else
 VB=
 endif
 
-# determine operating system name
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S), Darwin)
-  DLIB = lib$(NAME).dylib
-else ifeq ($(UNAME_S), Linux)
-  DLIB = lib$(NAME).so
+# cross-compilation
+ifeq ($(CHOST),)
 else
-  $(error Platform not supported: $(UNAME_S))
+	CROSS_PREFIX = $(CHOST)-
+	CXX := $(CROSS_PREFIX)$(CXX)
+	AR := $(CROSS_PREFIX)$(AR)
+	uname = $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')
+endif
+
+# determine operating system name
+uname ?= $(shell uname -s)
+
+# the location of the make-file (independent of the current directory)
+MROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
+ifeq ($(uname), Darwin)
+  DLIB = lib$(NAME).dylib
+else ifeq ($(uname), Linux)
+  DLIB = lib$(NAME).so
+else ifeq ($(uname), mingw32)
+  DLIB = $(NAME).dll  
+  CXXFLAGS += -I$(MROOT)/zlib-$(ZLIB_VERSION) -L$(MROOT)/zlib-$(ZLIB_VERSION)  
+else
+  $(error Platform not supported: $(uname))
 endif 
 
 dlib: $(DLIB)
@@ -74,6 +91,10 @@ lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a
 # shared library for Linux
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
 	$(VB) $(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
+	
+# shared library for MINGW; need to compile zlib separately
+$(NAME).dll: zlib-$(ZLIB_VERSION) lib$(NAME).so	
+	$(VB) cp lib$(NAME).so $(NAME).dll 		
 
 # static library with the glue code
 libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
@@ -104,6 +125,19 @@ lib$(SIG).a:
 	@#
 	$(VB) make -C $(DIR) lr
 	$(VB) cp $(DIR)/build/release/lib/lib$(NAME).a $@
+
+# zlib
+zlib-$(ZLIB_VERSION): zlib-$(ZLIB_VERSION).tar.gz
+	tar xzf $<
+	@#
+	@# patch makefile for mingw
+	@#
+	sed -e s/"PREFIX ="/"PREFIX = $(CROSS_PREFIX)"/ -i '' zlib-$(ZLIB_VERSION)/win32/Makefile.gcc
+	cd zlib-$(ZLIB_VERSION); make -f win32/Makefile.gcc
+		
+
+zlib-$(ZLIB_VERSION).tar.gz:
+	wget http://zlib.net/zlib-$(ZLIB_VERSION).tar.gz
 
 #-----------------------------------------------------------------------#
 #- LOCAL GLUE RULES ----------------------------------------------------#
