@@ -23,15 +23,15 @@ VERSION=$(shell ls $(NAME)-*.tar.gz | tail -1 | \
 # differentiate between with (directory / package name) and without
 # dash (the signature).
 
-SIG=$(NAME)$(VERSION)
-DIR=$(NAME)-$(VERSION)
-TARGET=dlib
+SIG		= $(NAME)$(VERSION)
+DIR		= $(NAME)-$(VERSION)
+TARGET	?= dlib
 
 #-----------------------------------------------------------------------#
 
-CXX=g++
-CXXFLAGS=-Wall -DNDEBUG -O3 -fPIC
-export CXXFLAGS
+export CXX 		?= g++
+export AR		?= ar
+export CXXFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
 
 #-----------------------------------------------------------------------#
 #- REQUIRED TOP RULES --------------------------------------------------#
@@ -81,7 +81,7 @@ libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
 	@# merge library and glue code into target
 	@# 
 	$(VB) cp lib$(SIG).a $@
-	$(VB) ar r $@ ipasir$(NAME)glue.o
+	$(VB) $(AR) r $@ ipasir$(NAME)glue.o
 
 # static solver library
 lib$(SIG).a:
@@ -89,7 +89,7 @@ lib$(SIG).a:
 	@# extract library
 	@#
 	$(VB) rm -rf $(DIR)
-	$(VB) tar xvf $(DIR).tar.gz
+	$(VB) tar xf $(DIR).tar.gz
 	@#
 	@# apply patch for set_terminate and learn_callback
 	@#
