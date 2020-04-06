@@ -47,6 +47,13 @@ clean:
 #- INVISIBLE INTERNAL SUB RULES ----------------------------------------#
 #-----------------------------------------------------------------------#
 
+# enable verbatim output
+ifeq ($(VERB),)
+VB=@
+else
+VB=
+endif
+
 # determine operating system name
 UNAME_S := $(shell uname -s)
 
@@ -62,48 +69,48 @@ dlib: $(DLIB)
 
 # shared library for Mac OS
 lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a 
-	$(CXX) $(CXXFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
+	$(VB) $(CXX) $(CXXFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
 
 # shared library for Linux
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
-	$(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
+	$(VB) $(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
 
 # static library with the glue code
 libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
 	@#
 	@# merge library and glue code into target
 	@# 
-	cp lib$(SIG).a $@
-	ar r $@ ipasir$(NAME)glue.o
+	$(VB) cp lib$(SIG).a $@
+	$(VB) ar r $@ ipasir$(NAME)glue.o
 
 # static solver library
 lib$(SIG).a:
 	@#
 	@# extract library
 	@#
-	rm -rf $(DIR)
-	tar xvf $(DIR).tar.gz
+	$(VB) rm -rf $(DIR)
+	$(VB) tar xvf $(DIR).tar.gz
 	@#
 	@# apply patch for set_terminate and learn_callback
 	@#
-	patch -p0 < $(DIR).patch
+	$(VB) patch -p0 < $(DIR).patch
 	@#
-	@# patch verbose output
+	$(VB) @# patch verbose output
 	@#
-	sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Main.cc
-	sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Solver.cc
+	$(VB) sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Main.cc
+	$(VB) sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Solver.cc
 	@#
 	@# configure and build library
 	@#
-	make -C $(DIR) lr
-	cp $(DIR)/build/release/lib/lib$(NAME).a $@
+	$(VB) make -C $(DIR) lr
+	$(VB) cp $(DIR)/build/release/lib/lib$(NAME).a $@
 
 #-----------------------------------------------------------------------#
 #- LOCAL GLUE RULES ----------------------------------------------------#
 #-----------------------------------------------------------------------#
 
 ipasir$(NAME)glue.o: ipasir$(NAME)glue.cc ipasir.h makefile lib$(SIG).a
-	$(CXX) $(CXXFLAGS) \
+	$(VB) $(CXX) $(CXXFLAGS) \
 	  -DVERSION=\"$(VERSION)\" \
 	  -I$(DIR) -I$(DIR)/minisat/core -c ipasir$(NAME)glue.cc
 
