@@ -1,0 +1,19 @@
+language: java
+os:
+  - linux
+  - osx
+git:
+  depth: 3
+matrix:
+  include:
+  - jdk: oraclejdk8
+    dist: trusty
+  - jdk: oraclejdk11
+    env: DEPLOY=true
+  - jdk: oraclejdk13
+
+install: mvn install -DskipTests=true
+script: mvn test -Dassembly.skipAssembly=true -B
+after_success:
+  - test "$DEPLOY" = true -a "$TRAVIS_PULL_REQUEST" = false 
+    && mvn source:jar deploy --settings .settings.xml -DskipTests=true -B
