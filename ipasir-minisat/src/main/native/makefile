@@ -132,7 +132,7 @@ zlib-$(ZLIB_VERSION): zlib-$(ZLIB_VERSION).tar.gz
 	@#
 	@# patch makefile for mingw
 	@#
-	sed -e s/"PREFIX ="/"PREFIX = $(CROSS_PREFIX)"/ -i '' zlib-$(ZLIB_VERSION)/win32/Makefile.gcc
+	sed -e s/"PREFIX ="/"PREFIX = $(CROSS_PREFIX)"/ -i.bak zlib-$(ZLIB_VERSION)/win32/Makefile.gcc
 	cd zlib-$(ZLIB_VERSION); make -f win32/Makefile.gcc
 		
 
