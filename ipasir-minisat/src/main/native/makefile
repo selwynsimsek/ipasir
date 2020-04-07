@@ -77,7 +77,8 @@ else ifeq ($(uname), Linux)
   DLIB = lib$(NAME).so
 else ifeq ($(uname), mingw32)
   DLIB = $(NAME).dll  
-  CXXFLAGS += -I$(MROOT)/zlib-$(ZLIB_VERSION) -L$(MROOT)/zlib-$(ZLIB_VERSION)  
+  CXXFLAGS += -I$(MROOT)/zlib-$(ZLIB_VERSION) -L$(MROOT)/zlib-$(ZLIB_VERSION)
+  LIBS = zlib-$(ZLIB_VERSION)  
 else
   $(error Platform not supported: $(uname))
 endif 
@@ -93,8 +94,8 @@ lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
 	$(VB) $(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
 	
 # shared library for MINGW; need to compile zlib separately
-$(NAME).dll: zlib-$(ZLIB_VERSION) lib$(NAME).so	
-	$(VB) cp lib$(NAME).so $(NAME).dll 		
+$(NAME).dll: ipasir$(NAME)glue.o libipasir$(SIG).a	
+	$(VB) $(CXX) $(CXXFLAGS) -static-libgcc -static-libstdc++ -g -I. -o $@ -shared -Wl,--subsystem,windows $^ 		
 
 # static library with the glue code
 libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
@@ -105,7 +106,7 @@ libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
 	$(VB) $(AR) r $@ ipasir$(NAME)glue.o
 
 # static solver library
-lib$(SIG).a:
+lib$(SIG).a: $(LIBS)
 	@#
 	@# extract library
 	@#
