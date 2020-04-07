@@ -23,9 +23,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-        server-id: ossrh
-        server-username: OSSRH_USERNAME
-        server-password: OSSRH_PASSWORD
+    - name: Copy settings.xml
+      run: cp .settings.xml ~/.m2/settings.xml    
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Publish snapshot
