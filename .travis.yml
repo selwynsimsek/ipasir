@@ -36,7 +36,7 @@ cache:
   - $HOME/.m2    
 
 before_install: mkdir -p ~/.m2 && cp .settings.xml ~/.m2/settings.xml
-install: mvn install -DskipTests=true $OPTIONS
+install: mvn install -DskipTests=true -U $OPTIONS
 script: mvn test -Dassembly.skipAssembly=true -B $OPTIONS
 after_success:
   - test "$DEPLOY" = true -a "$TRAVIS_PULL_REQUEST" = false 
