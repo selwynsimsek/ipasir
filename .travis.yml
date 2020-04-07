@@ -9,6 +9,22 @@ matrix:
   - os: linux
     jdk: oraclejdk11
     env: DEPLOY=true
+  - os: linux
+    jdk: oraclejdk11
+    addons:
+      apt:
+        packages: mingw-w64 
+    env: 
+      - DEPLOY=true
+      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-glucose,-ipasir-picosat" 
+  - os: linux
+    jdk: oraclejdk11
+    addons:
+      apt:
+        packages: mingw-w64 
+    env: 
+      - DEPLOY=true
+      - OPTIONS="-Px86_64-w64-mingw32 -pl -ipasir-glucose,-ipasir-picosat"
   - os: osx 
     jdk: oraclejdk11
     env: DEPLOY=true
@@ -16,8 +32,8 @@ matrix:
     jdk: oraclejdk13
 
 before_install: mkdir -p ~/.m2 && cp .settings.xml ~/.m2/settings.xml
-install: mvn install -DskipTests=true
-script: mvn test -Dassembly.skipAssembly=true -B
+install: mvn install -DskipTests=true $OPTIONS
+script: mvn test -Dassembly.skipAssembly=true -B $OPTIONS
 after_success:
   - test "$DEPLOY" = true -a "$TRAVIS_PULL_REQUEST" = false 
-    && mvn source:jar deploy -DskipTests=true -B
+    && mvn source:jar deploy -DskipTests=true -B $OPTIONS
