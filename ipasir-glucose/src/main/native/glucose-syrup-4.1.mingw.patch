@@ -1,0 +1,124 @@
+Only in glucose-syrup-4.1.mingw: .DS_Store
+diff -u -r glucose-syrup-4.1/core/Solver.cc glucose-syrup-4.1.mingw/core/Solver.cc
+--- glucose-syrup-4.1/core/Solver.cc	2020-04-08 12:04:01.000000000 +0200
++++ glucose-syrup-4.1.mingw/core/Solver.cc	2020-04-08 12:00:33.000000000 +0200
+@@ -325,8 +325,8 @@
+ 
+ 
+ void Solver::write_char(unsigned char ch) {
+-    if(putc_unlocked((int) ch, certifiedOutput) == EOF)
+-        exit(1);
++    // if(putc_unlocked((int) ch, certifiedOutput) == EOF)
++    //     exit(1);
+ }
+ 
+ 
+Only in glucose-syrup-4.1.mingw/core: Solver.cc.bak
+diff -u -r glucose-syrup-4.1/simp/Main.cc glucose-syrup-4.1.mingw/simp/Main.cc
+--- glucose-syrup-4.1/simp/Main.cc	2016-12-08 13:48:26.000000000 +0100
++++ glucose-syrup-4.1.mingw/simp/Main.cc	2020-04-08 12:00:33.000000000 +0200
+@@ -51,7 +51,7 @@
+ 
+ #include <signal.h>
+ #include <zlib.h>
+-#include <sys/resource.h>
++//#include <sys/resource.h>
+ 
+ #include "utils/System.h"
+ #include "utils/ParseUtils.h"
+@@ -174,29 +174,29 @@
+         // Use signal handlers that forcibly quit until the solver will be able to respond to
+         // interrupts:
+         signal(SIGINT, SIGINT_exit);
+-        signal(SIGXCPU,SIGINT_exit);
++        // signal(SIGXCPU,SIGINT_exit);
+ 
+ 
+         // Set limit on CPU-time:
+-        if (cpu_lim != INT32_MAX){
+-            rlimit rl;
+-            getrlimit(RLIMIT_CPU, &rl);
+-            if (rl.rlim_max == RLIM_INFINITY || (rlim_t)cpu_lim < rl.rlim_max){
+-                rl.rlim_cur = cpu_lim;
+-                if (setrlimit(RLIMIT_CPU, &rl) == -1)
+-                    printf("c WARNING! Could not set resource limit: CPU-time.\n");
+-            } }
+-
+-        // Set limit on virtual memory:
+-        if (mem_lim != INT32_MAX){
+-            rlim_t new_mem_lim = (rlim_t)mem_lim * 1024*1024;
+-            rlimit rl;
+-            getrlimit(RLIMIT_AS, &rl);
+-            if (rl.rlim_max == RLIM_INFINITY || new_mem_lim < rl.rlim_max){
+-                rl.rlim_cur = new_mem_lim;
+-                if (setrlimit(RLIMIT_AS, &rl) == -1)
+-                    printf("c WARNING! Could not set resource limit: Virtual memory.\n");
+-            } }
++        // if (cpu_lim != INT32_MAX){
++        //     rlimit rl;
++        //     getrlimit(RLIMIT_CPU, &rl);
++        //     if (rl.rlim_max == RLIM_INFINITY || (rlim_t)cpu_lim < rl.rlim_max){
++        //         rl.rlim_cur = cpu_lim;
++        //         if (setrlimit(RLIMIT_CPU, &rl) == -1)
++        //             printf("c WARNING! Could not set resource limit: CPU-time.\n");
++        //     } }
++
++        // // Set limit on virtual memory:
++        // if (mem_lim != INT32_MAX){
++        //     rlim_t new_mem_lim = (rlim_t)mem_lim * 1024*1024;
++        //     rlimit rl;
++        //     getrlimit(RLIMIT_AS, &rl);
++        //     if (rl.rlim_max == RLIM_INFINITY || new_mem_lim < rl.rlim_max){
++        //         rl.rlim_cur = new_mem_lim;
++        //         if (setrlimit(RLIMIT_AS, &rl) == -1)
++        //             printf("c WARNING! Could not set resource limit: Virtual memory.\n");
++        //     } }
+ 
+         if (argc == 1)
+             printf("c Reading from standard input... Use '--help' for help.\n");
+@@ -225,7 +225,7 @@
+         // Change to signal-handlers that will only notify the solver and allow it to terminate
+         // voluntarily:
+         signal(SIGINT, SIGINT_interrupt);
+-        signal(SIGXCPU,SIGINT_interrupt);
++        // signal(SIGXCPU,SIGINT_interrupt);
+ 
+         S.parsing = 0;
+         if(pre/* && !S.isIncremental()*/) {
+Only in glucose-syrup-4.1.mingw/simp: Main.cc.bak
+diff -u -r glucose-syrup-4.1/simp/SimpSolver.cc glucose-syrup-4.1.mingw/simp/SimpSolver.cc
+--- glucose-syrup-4.1/simp/SimpSolver.cc	2016-12-08 13:48:26.000000000 +0100
++++ glucose-syrup-4.1.mingw/simp/SimpSolver.cc	2020-04-08 12:00:33.000000000 +0200
+@@ -189,7 +189,7 @@
+     if (result == l_True)
+         result = Solver::solve_();
+     else if (verbosity >= 1)
+-        printf("===============================================================================\n");
++        printf("c [glucose-syrup4.1] ===============================================================================\n");
+ 
+     if (result == l_True)
+         extendModel();
+@@ -844,7 +844,7 @@
+     relocAll(to);
+     Solver::relocAll(to);
+     if (verbosity >= 2)
+-        printf("|  Garbage collection:   %12d bytes => %12d bytes             |\n", 
++        printf("c [glucose-syrup4.1] |  Garbage collection:   %12d bytes => %12d bytes             |\n", 
+                ca.size()*ClauseAllocator::Unit_Size, to.size()*ClauseAllocator::Unit_Size);
+     to.moveTo(ca);
+ }
+Only in glucose-syrup-4.1.mingw/simp: SimpSolver.cc.bak
+Only in glucose-syrup-4.1.mingw/simp: lib.a
+Only in glucose-syrup-4.1.mingw/simp: lib_release.a
+diff -u -r glucose-syrup-4.1/utils/System.h glucose-syrup-4.1.mingw/utils/System.h
+--- glucose-syrup-4.1/utils/System.h	2016-12-08 13:48:26.000000000 +0100
++++ glucose-syrup-4.1.mingw/utils/System.h	2020-04-08 12:00:33.000000000 +0200
+@@ -61,7 +61,7 @@
+ // Laurent: I know that this will not compile directly under Windows... sorry for that
+ static inline double Glucose::realTime() {
+     struct timeval tv;
+-    gettimeofday(&tv, NULL);
++    mingw_gettimeofday(&tv, NULL);
+     return (double)tv.tv_sec + (double) tv.tv_usec / 1000000; }
+ 
+ #endif

@@ -19,16 +19,6 @@ using namespace Glucose;
 
 extern "C" {
 static const char * sig = "glucose-syrup" VERSION;
-#include <sys/resource.h>
-#include <sys/time.h>
-static double getime (void) {
-  struct rusage u;
-  double res;
-  if (getrusage (RUSAGE_SELF, &u)) return 0;
-  res = u.ru_utime.tv_sec + 1e-6 * u.ru_utime.tv_usec;
-  res += u.ru_stime.tv_sec + 1e-6 * u.ru_stime.tv_usec;
-  return res;
-}
 };
 
 class IPAsirMiniSAT : public Solver {
@@ -86,26 +76,7 @@ public:
     int tmp = var (import (lit));
     assert (0 <= tmp && tmp < nVars ());
     return fmap[tmp] != 0;
-  }
-  void stats () {
-    double t = getime ();
-    printf (
-      "c [%s]\n"
-      "c [%s]        calls %12llu   %9.1f per second\n"
-      "c [%s]     restarts %12llu   %9.1f per second\n"
-      "c [%s]    conflicts %12llu   %9.1f per second\n"
-      "c [%s]    decisions %12llu   %9.1f per second\n"
-      "c [%s] propagations %12llu   %9.1f per second\n"
-      "c [%s]\n",
-    sig,
-    sig, (unsigned long long) calls, ps (calls, t),
-    sig, (unsigned long long) starts, ps (starts, t),
-    sig, (unsigned long long) conflicts, ps (conflicts, t),
-    sig, (unsigned long long) decisions, ps (decisions, t),
-    sig, (unsigned long long) propagations, ps (propagations, t),
-    sig);
-    fflush (stdout);
-  }
+  }  
 };
 
 extern "C" {
@@ -113,7 +84,7 @@ extern "C" {
 static IPAsirMiniSAT * import (void * s) { return (IPAsirMiniSAT*) s; }
 const char * ipasir_signature () { return sig; }
 void * ipasir_init () { return new IPAsirMiniSAT (); }
-void ipasir_release (void * s) { import (s)->stats (); delete import (s); }
+void ipasir_release (void * s) { delete import (s); }
 int ipasir_solve (void * s) { return import (s)->solve (); }
 void ipasir_add (void * s, int l) { import (s)->add (l); }
 void ipasir_assume (void * s, int l) { import (s)->assume (l); }
