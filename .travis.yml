@@ -16,7 +16,7 @@ matrix:
         packages: mingw-w64 
     env: 
       - DEPLOY=true
-      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-glucose,-ipasir-picosat" 
+      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-picosat" 
   - os: linux
     jdk: oraclejdk11
     addons:
@@ -24,7 +24,7 @@ matrix:
         packages: mingw-w64 
     env: 
       - DEPLOY=true
-      - OPTIONS="-Px86_64-w64-mingw32 -pl -ipasir-glucose,-ipasir-picosat"
+      - OPTIONS="-Px86_64-w64-mingw32 -pl -ipasir-picosat"
   - os: osx 
     jdk: oraclejdk11
     env: DEPLOY=true
