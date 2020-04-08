@@ -36,10 +36,12 @@ jobs:
       before_install: skip
       install: skip
       script:
-      - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
       - >
          curl -LO --retry 3 https://raw.github.com/liveontologies/trigger-travis/master/trigger-travis.sh 
          && sh trigger-travis.sh --pro liveontologies ipasir4j $TRAVIS_ACCESS_TOKEN
+      - >
+         curl -LO --retry 3 https://gist.githubusercontent.com/ykazakov/33a86f5055888342f6a32d829fc02fa9/raw/9681f17d477ea519e3630db69eaed393c0222cce/trigger-appveyor.sh 
+         && sh trigger-appveyor.sh ykazakov ipasir4j $APPVEYOR_BEARER_TOKEN   
       after_success: skip
 cache:
    directories:
