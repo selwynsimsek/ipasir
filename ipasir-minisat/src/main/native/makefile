@@ -31,6 +31,7 @@ TARGET	?= dlib
 
 export CXX 		?= g++
 export AR		?= ar
+export MAKE		?= make
 export CXXFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
 # zlib is not provided for mingw32
 ZLIB_VERSION	?= 1.2.11
@@ -43,7 +44,7 @@ all: $(TARGET)
 
 clean:
 	rm -rf $(DIR) zlib-$(ZLIB_VERSION)
-	rm -f *.o *.a *.dylib *.so
+	rm -f *.o *.a *.dylib *.so *.dll
 
 #-----------------------------------------------------------------------#
 #- INVISIBLE INTERNAL SUB RULES ----------------------------------------#
@@ -62,25 +63,26 @@ else
 	CROSS_PREFIX = $(CHOST)-
 	CXX := $(CROSS_PREFIX)$(CXX)
 	AR := $(CROSS_PREFIX)$(AR)
-	uname = $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')
+	UNAME = $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')
 endif
 
 # determine operating system name
-uname ?= $(shell uname -s)
+UNAME ?= $(shell uname -s)
 
-# the location of the make-file (independent of the current directory)
+# the location of this makefile (independent of the current directory)
 MROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-ifeq ($(uname), Darwin)
+ifeq ($(UNAME), Darwin)
   DLIB = lib$(NAME).dylib
-else ifeq ($(uname), Linux)
+else ifeq ($(UNAME), Linux)
   DLIB = lib$(NAME).so
-else ifeq ($(uname), mingw32)
+else ifeq ($(UNAME), mingw32)
   DLIB = $(NAME).dll  
   CXXFLAGS += -I$(MROOT)/zlib-$(ZLIB_VERSION) -L$(MROOT)/zlib-$(ZLIB_VERSION)
+  # MinGW does not ship with zlib
   LIBS = zlib-$(ZLIB_VERSION)  
 else
-  $(error Platform not supported: $(uname))
+  $(error Platform not supported: $(UNAME))
 endif 
 
 dlib: $(DLIB)
@@ -93,7 +95,7 @@ lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
 	$(VB) $(CXX) $(CXXFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $^
 	
-# shared library for MINGW; need to compile zlib separately
+# shared library for MinGW
 $(NAME).dll: ipasir$(NAME)glue.o libipasir$(SIG).a	
 	$(VB) $(CXX) $(CXXFLAGS) -static-libgcc -static-libstdc++ -g -I. -o $@ -shared -Wl,--subsystem,windows $^ 		
 
@@ -106,26 +108,27 @@ libipasir$(SIG).a: lib$(SIG).a ipasir$(NAME)glue.o
 	$(VB) $(AR) r $@ ipasir$(NAME)glue.o
 
 # static solver library
-lib$(SIG).a: $(LIBS)
-	@#
-	@# extract library
-	@#
-	$(VB) rm -rf $(DIR)
-	$(VB) tar xf $(DIR).tar.gz
+lib$(SIG).a: $(DIR) $(DIR).patch $(LIBS)
 	@#
 	@# apply patch for set_terminate and learn_callback
 	@#
 	$(VB) patch -p0 < $(DIR).patch
 	@#
-	$(VB) @# patch verbose output
+	@# patch verbose output
 	@#
-	$(VB) sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Main.cc
-	$(VB) sed -i -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Solver.cc
+	$(VB) sed -i.bak -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Main.cc
+	$(VB) sed -i.bak -e 's,"\([=|]\),"c [${SIG}] \1,' $(DIR)/minisat/core/Solver.cc
 	@#
 	@# configure and build library
 	@#
-	$(VB) make -C $(DIR) lr
+	$(VB) $(MAKE) -C $(DIR) lr
 	$(VB) cp $(DIR)/build/release/lib/lib$(NAME).a $@
+
+$(DIR): $(DIR).tar.gz
+	@#
+	@# extract library
+	@#
+	$(VB) tar xf $(DIR).tar.gz
 
 # zlib
 zlib-$(ZLIB_VERSION): zlib-$(ZLIB_VERSION).tar.gz
@@ -133,12 +136,12 @@ zlib-$(ZLIB_VERSION): zlib-$(ZLIB_VERSION).tar.gz
 	@#
 	@# patch makefile for mingw
 	@#
-	sed -e s/"PREFIX ="/"PREFIX = $(CROSS_PREFIX)"/ -i.bak zlib-$(ZLIB_VERSION)/win32/Makefile.gcc
-	cd zlib-$(ZLIB_VERSION); make -f win32/Makefile.gcc
+	$(VB) sed -i.bak -e s/"PREFIX ="/"PREFIX = $(CROSS_PREFIX)"/ zlib-$(ZLIB_VERSION)/win32/Makefile.gcc
+	$(VB) cd zlib-$(ZLIB_VERSION); $(MAKE) -f win32/Makefile.gcc
 		
 
 zlib-$(ZLIB_VERSION).tar.gz:
-	wget http://zlib.net/zlib-$(ZLIB_VERSION).tar.gz
+	$(VB) wget http://zlib.net/zlib-$(ZLIB_VERSION).tar.gz
 
 #-----------------------------------------------------------------------#
 #- LOCAL GLUE RULES ----------------------------------------------------#
