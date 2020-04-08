@@ -1,43 +1,52 @@
 language: java
 git:
-  depth: 3
-matrix:
-  include:
-  - os: linux
-    jdk: oraclejdk8
-    dist: trusty
-  - os: linux
-    jdk: oraclejdk11
-    env: DEPLOY=true
-  - os: linux
-    jdk: oraclejdk11
-    addons:
-      apt:
-        packages: mingw-w64 
-    env: 
+   depth: 3
+jobs:
+   include:
+   -  stage: build
+      os: linux
+      jdk: oraclejdk8
+      dist: trusty
+   -  os: linux
+      jdk: oraclejdk11
+      env: DEPLOY=true
+   -  os: linux
+      jdk: oraclejdk11
+      addons:
+         apt:
+            packages: mingw-w64
+      env:
       - DEPLOY=true
-      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-picosat" 
-  - os: linux
-    jdk: oraclejdk11
-    addons:
-      apt:
-        packages: mingw-w64 
-    env: 
+      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-picosat"
+   -  os: linux
+      jdk: oraclejdk11
+      addons:
+         apt:
+            packages: mingw-w64
+      env:
       - DEPLOY=true
       - OPTIONS="-Px86_64-w64-mingw32 -pl -ipasir-picosat"
-  - os: osx 
-    jdk: oraclejdk11
-    env: DEPLOY=true
-  - os: linux
-    jdk: oraclejdk13
-    
+   -  os: osx
+      jdk: oraclejdk11
+      env: DEPLOY=true
+   -  os: linux
+      jdk: oraclejdk13
+   -  stage: trigger downstream
+      script:
+      - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST"
+      - |
+         if [[ ($TRAVIS_BRANCH == master) &&
+                   ($TRAVIS_PULL_REQUEST == false) ]] ; then
+             curl -LO --retry 3 https://raw.github.com/liveontologies/trigger-travis/master/trigger-travis.sh
+             sh trigger-travis.sh --pro liveontologies ipasir4j $TRAVIS_ACCESS_TOKEN
+         else
+             echo "trigger-travis.sh did not run"
+         fi
 cache:
-  directories:
-  - $HOME/.m2    
-
+   directories:
+   - $HOME/.m2
 before_install: mkdir -p ~/.m2 && cp .settings.xml ~/.m2/settings.xml
 install: mvn install -DskipTests=true -U $OPTIONS
 script: mvn test -Dassembly.skipAssembly=true -B $OPTIONS
 after_success:
-  - test "$DEPLOY" = true -a "$TRAVIS_PULL_REQUEST" = false 
-    && mvn source:jar deploy -DskipTests=true -B $OPTIONS
+- test "$DEPLOY" = true -a "$TRAVIS_PULL_REQUEST" = false && mvn source:jar deploy -DskipTests=true -B $OPTIONS
