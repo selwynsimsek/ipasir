@@ -1,0 +1,145 @@
+diff -u -r picosat-961/app.c picosat-961.mingw/app.c
+--- picosat-961/app.c	2015-01-29 15:26:21.000000000 +0100
++++ picosat-961.mingw/app.c	2020-04-09 09:58:38.000000000 +0200
+@@ -394,16 +394,16 @@
+ static void (*sig_alarm_handler);
+ static int ought_to_be_interrupted, interrupt_notified;
+ 
+-static void
+-alarm_triggered (int sig)
+-{
+-  (void) sig;
+-  assert (sig == SIGALRM);
+-  assert (time_limit_in_seconds);
+-  assert (!ought_to_be_interrupted);
+-  ought_to_be_interrupted = 1;
+-  assert (!interrupt_notified);
+-}
++// static void
++// alarm_triggered (int sig)
++// {
++//   (void) sig;
++//   assert (sig == SIGALRM);
++//   assert (time_limit_in_seconds);
++//   assert (!ought_to_be_interrupted);
++//   ought_to_be_interrupted = 1;
++//   assert (!interrupt_notified);
++// }
+ 
+ static int
+ interrupt_call_back (void * dummy)
+@@ -426,22 +426,22 @@
+   return 1;
+ }
+ 
+-static void
+-setalarm ()
+-{
+-  assert (time_limit_in_seconds > 0);
+-  sig_alarm_handler = signal (SIGALRM, alarm_triggered);
+-  alarm (time_limit_in_seconds);
+-  assert (picosat);
+-  picosat_set_interrupt (picosat, 0, interrupt_call_back);
+-}
+-
+-static void
+-resetalarm ()
+-{
+-  assert (time_limit_in_seconds > 0);
+-  (void) signal (SIGALRM, sig_term_handler);
+-}
++// static void
++// setalarm ()
++// {
++//   assert (time_limit_in_seconds > 0);
++//   sig_alarm_handler = signal (SIGALRM, alarm_triggered);
++//   alarm (time_limit_in_seconds);
++//   assert (picosat);
++//   picosat_set_interrupt (picosat, 0, interrupt_call_back);
++// }
++
++// static void
++// resetalarm ()
++// {
++//   assert (time_limit_in_seconds > 0);
++//   (void) signal (SIGALRM, sig_term_handler);
++// }
+ 
+ static void
+ message (int sig)
+@@ -971,8 +971,8 @@
+       if (verbose)
+ 	setsighandlers ();
+ 
+-      if (time_limit_in_seconds)
+-	setalarm ();
++    //   if (time_limit_in_seconds)
++	// setalarm ();
+ 
+       picosat_enter (picosat);
+ 
+@@ -1167,8 +1167,8 @@
+ 
+       picosat_leave (picosat);
+ 
+-      if (time_limit_in_seconds)
+-	resetalarm ();
++    //   if (time_limit_in_seconds)
++	// resetalarm ();
+ 
+       if (verbose)
+ 	resetsighandlers ();
+diff -u -r picosat-961/configure picosat-961.mingw/configure
+--- picosat-961/configure	2015-01-29 15:26:21.000000000 +0100
++++ picosat-961.mingw/configure	2020-04-09 09:56:49.000000000 +0200
+@@ -73,6 +73,10 @@
+ 
+ [ "X$CC" = X ] && CC=gcc
+ 
++[ "X$AR" = X ] && AR=ar
++
++[ "X$RANLIB" = X ] && RANLIB=ranlib
++
+ if [ X"$CFLAGS" = X ]
+ then
+   case X"$CC" in
+@@ -115,12 +119,18 @@
+ 
+ echo "cc ... $CC"
+ 
++echo "ar ... $AR"
++
++echo "ranlib ... $RANLIB"
++
+ echo "cflags ... $CFLAGS"
+ 
+ printf "makefile ..."
+ rm -f makefile
+ sed \
+   -e "s,@CC@,$CC," \
++  -e "s,@AR@,$AR," \
++  -e "s,@RANLIB@,$RANLIB," \
+   -e "s,@CFLAGS@,$CFLAGS," \
+   -e "s,@TARGETS@,$TARGETS," \
+ makefile.in > makefile
+diff -u -r picosat-961/makefile.in picosat-961.mingw/makefile.in
+--- picosat-961/makefile.in	2015-01-29 15:26:21.000000000 +0100
++++ picosat-961.mingw/makefile.in	2020-04-09 09:53:35.000000000 +0200
+@@ -1,4 +1,6 @@
+ CC=@CC@
++AR=@AR@
++RANLIB=@RANLIB@
+ CFLAGS=@CFLAGS@
+ 
+ all: @TARGETS@
+@@ -49,8 +51,8 @@
+ 	rm -f $@; ./mkconfig > $@
+ 
+ libpicosat.a: picosat.o version.o
+-	ar rc $@ picosat.o version.o
+-	ranlib $@
++	$(AR) rc $@ picosat.o version.o
++	$(RANLIB) $@
+ 
+ SONAME=-Xlinker -soname -Xlinker libpicosat.so
+ libpicosat.so: picosat.o version.o

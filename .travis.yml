@@ -17,7 +17,7 @@ jobs:
             packages: mingw-w64
       env:
       - DEPLOY=true
-      - OPTIONS="-Pi686-w64-mingw32 -pl -ipasir-picosat"
+      - OPTIONS="-Pi686-w64-mingw32"
    -  os: linux
       jdk: oraclejdk11
       addons:
@@ -25,7 +25,7 @@ jobs:
             packages: mingw-w64
       env:
       - DEPLOY=true
-      - OPTIONS="-Px86_64-w64-mingw32 -pl -ipasir-picosat"
+      - OPTIONS="-Px86_64-w64-mingw32"
    -  os: osx
       jdk: oraclejdk11
       env: DEPLOY=true
