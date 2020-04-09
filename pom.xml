@@ -18,6 +18,7 @@
 	<description>This library provides native shared libraries of propositional satisfiability (SAT) solvers that implement the Reentrant Incremental Sat solver API (reverse: IPASIR). This libraries are compiled and packaged so that they can be conveniently used by the Java Native Acces (JNA) library.</description>
 
 	<modules>
+		<module>ipasir-cryptominisat</module>
 		<module>ipasir-glucose</module>
 		<module>ipasir-minisat</module>
 		<module>ipasir-picosat</module>
