@@ -79,7 +79,7 @@ dlib: $(DLIB)
 
 # shared library for Mac OS
 lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a
-	$(VB) $(CXX) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
+	$(VB) $(CXX) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ $^
 
 # shared library for Linux
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
@@ -109,7 +109,7 @@ $(DIR): $(DIR).tgz $(DIR).patch
 	@#
 	@# extract library
 	@#
-	tar xf $(DIR).tgz
+	tar xf $<
 	@# apply patch for set_terminate and learn_callback
 	@#
 	$(VB) patch -p0 < $(DIR).patch
@@ -130,7 +130,7 @@ $(DIR).tgz:
 	@#
 	@# download library
 	@#
-	wget "https://www.labri.fr/perso/lsimon/downloads/softwares/$(DIR).tgz"
+	wget "https://www.labri.fr/perso/lsimon/downloads/softwares/$@"
 
 # zlib
 zlib-$(ZLIB_VERSION): zlib-$(ZLIB_VERSION).tar.gz

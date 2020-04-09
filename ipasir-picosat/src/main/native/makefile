@@ -95,7 +95,7 @@ dlib: $(DLIB)
 
 # shared library for Mac OS
 lib$(NAME).dylib: ipasir$(NAME)glue.o libipasir$(SIG).a
-	$(VB) $(CXX) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ -o $@ $^
+	$(VB) $(CXX) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ $^
 
 # shared library for Linux
 lib$(NAME).so: ipasir$(NAME)glue.o libipasir$(SIG).a
