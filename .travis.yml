@@ -3,14 +3,15 @@ git:
    depth: 3
 jobs:
    include:
-   -  stage: build
+   -  stage: build      
       os: linux
-      jdk: oraclejdk8
       dist: trusty
+      jdk: oraclejdk8 
+      env: DEPLOY=true     
    -  os: linux
-      jdk: oraclejdk11
-      env: DEPLOY=true
+      jdk: oraclejdk11         
    -  os: linux
+      dist: bionic
       jdk: oraclejdk11
       addons:
          apt:
@@ -19,6 +20,7 @@ jobs:
       - DEPLOY=true
       - OPTIONS="-Pi686-w64-mingw32"
    -  os: linux
+      dist: bionic
       jdk: oraclejdk11
       addons:
          apt:
