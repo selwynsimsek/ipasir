@@ -3,12 +3,6 @@
 set -e
 set -x
 
-if [ -n "$1" ]; then
-  # interpret the parameter as a toolchain file
-  OPTIONS="-DCMAKE_TOOLCHAIN_FILE=$1"
-fi
-
-
 rm -rf bin/crypto*
 rm -rf bin/cusp*
 
@@ -17,6 +11,6 @@ mkdir build
 
 (
 cd build || exit
-cmake -DENABLE_PYTHON_INTERFACE=OFF -DNOVALGRIND=ON -DNOZLIB=ON -DONLY_SIMPLE=ON -DSTATICCOMPILE=ON -DIPASIR=ON -DCMAKE_BUILD_TYPE=Release $OPTIONS ..
+cmake -DENABLE_PYTHON_INTERFACE=OFF -DNOVALGRIND=ON -DNOZLIB=ON -DONLY_SIMPLE=ON -DSTATICCOMPILE=ON -DIPASIR=ON -MIT=ON -DCMAKE_BUILD_TYPE=Release $@ ..
 make -j4
 )

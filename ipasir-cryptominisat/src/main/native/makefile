@@ -23,9 +23,11 @@ TARGET	?= dlib
 # but not if it set by the user
 # see: https://stackoverflow.com/a/42958970
 ifeq ($(origin CC),default)
-CC 		= g++
+export CC 		= gcc
 endif
-
+ifeq ($(origin CXX),default)
+export CXX		= g++
+endif
 export AR		?= ar
 export CFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
 
@@ -54,13 +56,17 @@ endif
 MROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # cross-compilation
-ifeq ($(CHOST),)
-else
+ifneq ($(CHOST),)
 	CROSS_PREFIX = $(CHOST)-
 	CC := $(CROSS_PREFIX)$(CC)
-	AR := $(CROSS_PREFIX)$(AR)	
-	UNAME = $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')
-	TOOLCHAIN=$(MROOT)/toolchain-$(CHOST).cmake
+	CXX := $(CROSS_PREFIX)$(CXX)
+	# prefer -posix version if there are any
+	ifneq ($(shell command -v "$(CC)-posix"),)
+		CC := $(CC)-posix
+		CXX := $(CXX)-posix 
+	endif	
+	AR := $(CROSS_PREFIX)$(AR)
+	UNAME := $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')#						
 endif
 
 # determine operating system name
@@ -72,33 +78,33 @@ CMSLIB = $(DIR)/build/lib/libcryptominisat5.a
 IPASIRGLUEOBJ=$(DIR)/build/cmsat5-src/CMakeFiles/ipasircryptominisat5.dir/ipasir.cpp.o
 
 ifeq ($(UNAME), Darwin)
-  DLIB = lib$(NAME).dylib
+ 	DLIB = lib$(NAME).dylib
 else ifeq ($(UNAME), Linux)
-  DLIB = lib$(NAME).so
+ 	DLIB = lib$(NAME).so
 else ifeq ($(UNAME), mingw32)
-  DLIB = $(NAME).dll  
-  # different file names for windows
-  CMSLIB = $(DIR)/build/lib/libcryptominisat5win.a  
-  IPASIRGLUEOBJ=$(DIR)/build/cmsat5-src/CMakeFiles/ipasircryptominisat5.dir/ipasir.cpp.obj
+ 	DLIB = $(NAME).dll  
+ 	CMAKE_OPTIONS=-D CMAKE_SYSTEM_NAME=Windows
+ 	# different file names for windows
+ 	CMSLIB = $(DIR)/build/lib/libcryptominisat5win.a  
+ 	IPASIRGLUEOBJ=$(DIR)/build/cmsat5-src/CMakeFiles/ipasircryptominisat5.dir/ipasir.cpp.obj  
 else
-  $(error Platform not supported: $(UNAME))
+ 	$(error Platform not supported: $(UNAME))
 endif 
 
 dlib: $(DLIB)
 
 
-
 # shared library for Mac OS
 lib$(NAME).dylib: libipasir$(SIG).a
-	$(VB) $(CC) $(CFLAGS) -g -I. -o $@ -dynamiclib -install_name $@ $(IPASIRGLUEOBJ) $^ 
+	$(VB) $(CXX) $(CFLAGS) -g -I. -o $@ $(IPASIRGLUEOBJ) $^ -dynamiclib -install_name $@ 
 
 # shared library for Linux
 lib$(NAME).so: libipasir$(SIG).a
-	$(VB) $(CC) $(CFLAGS) -g -I. -o $@ -shared -Wl,-soname,$@ $(IPASIRGLUEOBJ) $^ 
+	$(VB) $(CXX) -o $@ $(IPASIRGLUEOBJ) $^ $(CFLAGS) -g -I. -shared -Wl,-soname,$@ 
 
 # shared library for MinGW
-$(NAME).dll: libipasir$(SIG).a	
-	$(VB) $(CC) $(CFLAGS) -static-libgcc -static-libstdc++ -g -I. -o $@ -shared -Wl,--subsystem,windows $(IPASIRGLUEOBJ) $^
+$(NAME).dll: libipasir$(SIG).a	 	
+	$(VB) $(CXX) -o $@ $(IPASIRGLUEOBJ) $^ $(CFLAGS) -static-libgcc -static-libstdc++ -g -I. -shared -Wl,--subsystem,windows -Wl,-Bstatic -lstdc++ -lpthread
 
 # static library with the glue code
 libipasir$(SIG).a: lib$(SIG).a
@@ -113,7 +119,7 @@ lib$(SIG).a: $(DIR) $(LIBS)
 	@#
 	@# configure and build library
 	@#
-	cd $(DIR); sh ../build.sh $(TOOLCHAIN)	
+	cd $(DIR); sh ../build.sh $(CMAKE_OPTIONS)	
 	cp $(CMSLIB) $@
 
 $(DIR): $(VERSION).tar.gz
