@@ -40,7 +40,7 @@ all: $(TARGET)
 
 clean:
 	rm -rf $(DIR)
-	rm -f *.o *.a *.tar.gz *.dylib
+	rm -f *.o *.a *.tar.gz *.dylib *.dll *.so
 
 #-----------------------------------------------------------------------#
 #- INVISIBLE INTERNAL SUB RULES ----------------------------------------#
@@ -116,7 +116,7 @@ libipasir$(SIG).a: lib$(SIG).a
 	$(VB) $(AR) r $@ $(IPASIRGLUEOBJ)
 
 # static solver library
-lib$(SIG).a: $(DIR) $(LIBS)
+lib$(SIG).a: $(DIR)
 	@#
 	@# configure and build library
 	@#
@@ -129,10 +129,6 @@ $(DIR): $(COMMIT).zip
 	@# extract library
 	@#
 	$(VB) unzip $<
-	@#
-	@# apply patch for set_terminate and learn_callback
-	@#
-	#patch $(DIR)/src/ipasir.cpp < ipasir.cpp.patch
 
 $(COMMIT).zip:
 	@#
