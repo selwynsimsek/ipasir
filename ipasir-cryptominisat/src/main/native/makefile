@@ -6,6 +6,7 @@
 
 NAME=cryptominisat
 VERSION=5.6.8
+COMMIT=6d8c7e225b256bac51807ea21454589b414f2aa9
 
 #-----------------------------------------------------------------------#
 # Solver signatures have to be both valid file names and C symbols.
@@ -13,8 +14,8 @@ VERSION=5.6.8
 # differentiate between with (directory / package name) and without
 # dash (the signature).
 
-SIG=$(NAME)$(VERSION)
-DIR=$(NAME)-$(VERSION)
+SIG=$(NAME)$(VERSION)$(COMMIT)
+DIR=$(NAME)-$(COMMIT)
 TARGET	?= dlib
 
 #-----------------------------------------------------------------------#
@@ -122,17 +123,18 @@ lib$(SIG).a: $(DIR) $(LIBS)
 	cd $(DIR); sh ../build.sh $(CMAKE_OPTIONS)	
 	cp $(CMSLIB) $@
 
-$(DIR): $(VERSION).tar.gz
+
+$(DIR): $(COMMIT).zip
 	@#
 	@# extract library
 	@#
-	$(VB) tar xf $<
+	$(VB) unzip $<
 	@#
 	@# apply patch for set_terminate and learn_callback
 	@#
-	patch $(DIR)/src/ipasir.cpp < ipasir.cpp.patch
+	#patch $(DIR)/src/ipasir.cpp < ipasir.cpp.patch
 
-$(VERSION).tar.gz:
+$(COMMIT).zip:
 	@#
 	@# download library
 	@#
