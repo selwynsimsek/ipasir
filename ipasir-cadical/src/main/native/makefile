@@ -4,9 +4,9 @@
 
 # Keep this as generic as possible.
 
-NAME=cryptominisat
-VERSION=5.6.8
-COMMIT=6d8c7e225b256bac51807ea21454589b414f2aa9
+NAME=cadical
+VERSION=rel-1.2.1
+COMMIT=0f6674c67784d47dccf04dca10976636807702d7
 
 #-----------------------------------------------------------------------#
 # Solver signatures have to be both valid file names and C symbols.
@@ -20,17 +20,14 @@ TARGET	?= dlib
 
 #-----------------------------------------------------------------------#
 
-# Make sets default value for CC, we want to override them
+# Make sets default value for CXX, we want to override them
 # but not if it set by the user
 # see: https://stackoverflow.com/a/42958970
-ifeq ($(origin CC),default)
-export CC 		= gcc
-endif
 ifeq ($(origin CXX),default)
 export CXX		= g++
 endif
 export AR		?= ar
-export CFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
+export CXXFLAGS	?= -Wall -DNDEBUG -O3 -fPIC
 
 #-----------------------------------------------------------------------#
 #- REQUIRED TOP RULES --------------------------------------------------#
@@ -59,35 +56,29 @@ MROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # cross-compilation
 ifneq ($(CHOST),)
 	CROSS_PREFIX = $(CHOST)-
-	CC := $(CROSS_PREFIX)$(CC)
 	CXX := $(CROSS_PREFIX)$(CXX)
 	# prefer -posix version if there are any
-	ifneq ($(shell command -v "$(CC)-posix"),)
-		CC := $(CC)-posix
+	ifneq ($(shell command -v "$(CXX)-posix"),)
 		CXX := $(CXX)-posix 
 	endif	
 	AR := $(CROSS_PREFIX)$(AR)
+	export SKIP_EXEC=1
 	UNAME := $(shell echo "$(CHOST)" | sed -e 's/^[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)\s*$$/\1/' -e 's/^[^-]*-[^-]*-\([^-]*\)-.*$$/\1/')#						
 endif
 
 # determine operating system name
 UNAME ?= $(shell uname -s)
 
-# the build static library
-CMSLIB = $(DIR)/build/lib/libcryptominisat5.a
 # the build glue object file implementing the ipasir interface
-IPASIRGLUEOBJ=$(DIR)/build/cmsat5-src/CMakeFiles/ipasircryptominisat5.dir/ipasir.cpp.o
+IPASIRGLUEOBJ=$(DIR)/build/ipasir.o
 
 ifeq ($(UNAME), Darwin)
  	DLIB = lib$(NAME).dylib
 else ifeq ($(UNAME), Linux)
  	DLIB = lib$(NAME).so
 else ifeq ($(UNAME), mingw32)
- 	DLIB = $(NAME).dll  
- 	CMAKE_OPTIONS=-D CMAKE_SYSTEM_NAME=Windows
- 	# different file names for windows
- 	CMSLIB = $(DIR)/build/lib/libcryptominisat5win.a  
- 	IPASIRGLUEOBJ=$(DIR)/build/cmsat5-src/CMakeFiles/ipasircryptominisat5.dir/ipasir.cpp.obj  
+ 	DLIB = $(NAME).dll
+ 	CXXFLAGS := $(CXXFLAGS) -D_POSIX -D__USE_MINGW_ALARM 
 else
  	$(error Platform not supported: $(UNAME))
 endif 
@@ -120,8 +111,8 @@ lib$(SIG).a: $(DIR)
 	@#
 	@# configure and build library
 	@#
-	cd $(DIR); sh ../build.sh $(CMAKE_OPTIONS)	
-	cp $(CMSLIB) $@
+	cd $(DIR); ./configure && make cadical	
+	cp $(DIR)/build/libcadical.a $@
 
 
 $(DIR): $(COMMIT).tar.gz
@@ -134,7 +125,7 @@ $(COMMIT).tar.gz:
 	@#
 	@# download library
 	@#
-	wget "https://github.com/msoos/cryptominisat/archive/$@"
+	wget "https://github.com/liveontologies/cadical/archive/$@"
 
 #-----------------------------------------------------------------------#
 
