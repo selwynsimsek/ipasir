@@ -16,7 +16,7 @@ void * ipasir_init () {
 }
 
 void ipasir_release (void * solver) {
-  picosat_stats (solver);
+  // picosat_stats (solver);
   picosat_reset (solver);
 }
 
