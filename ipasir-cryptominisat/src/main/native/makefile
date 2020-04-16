@@ -6,7 +6,7 @@
 
 NAME=cryptominisat
 VERSION=5.6.8
-COMMIT=6d8c7e225b256bac51807ea21454589b414f2aa9
+COMMIT=f38684e4568ab10dd56c1a179f57fb49e81d5730
 
 #-----------------------------------------------------------------------#
 # Solver signatures have to be both valid file names and C symbols.
