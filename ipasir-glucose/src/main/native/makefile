@@ -5,7 +5,7 @@
 # Keep this as generic as possible.
 
 NAME=glucose-syrup
-VERSION=4.1
+VERSION=${library.version}
 
 #-----------------------------------------------------------------------#
 # Solver signatures have to be both valid file names and C symbols.

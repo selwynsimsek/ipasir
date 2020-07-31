@@ -5,8 +5,7 @@
 # Keep this as generic as possible.
 
 NAME=cryptominisat
-VERSION=5.6.8
-COMMIT=f38684e4568ab10dd56c1a179f57fb49e81d5730
+VERSION=${library.version}
 
 #-----------------------------------------------------------------------#
 # Solver signatures have to be both valid file names and C symbols.
@@ -14,8 +13,8 @@ COMMIT=f38684e4568ab10dd56c1a179f57fb49e81d5730
 # differentiate between with (directory / package name) and without
 # dash (the signature).
 
-SIG=$(NAME)$(VERSION)$(COMMIT)
-DIR=$(NAME)-$(COMMIT)
+SIG=$(NAME)$(VERSION)
+DIR=$(NAME)-$(VERSION)
 TARGET	?= dlib
 
 #-----------------------------------------------------------------------#
@@ -124,13 +123,13 @@ lib$(SIG).a: $(DIR)
 	cp $(CMSLIB) $@
 
 
-$(DIR): $(COMMIT).tar.gz
+$(DIR): $(VERSION).tar.gz
 	@#
 	@# extract library
 	@#
 	$(VB) tar xf $<
 
-$(COMMIT).tar.gz:
+$(VERSION).tar.gz:
 	@#
 	@# download library
 	@#

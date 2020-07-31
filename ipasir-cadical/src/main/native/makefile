@@ -5,7 +5,7 @@
 # Keep this as generic as possible.
 
 NAME=cadical
-VERSION=rel-1.2.1
+VERSION=${library.version}
 COMMIT=0f6674c67784d47dccf04dca10976636807702d7
 
 #-----------------------------------------------------------------------#

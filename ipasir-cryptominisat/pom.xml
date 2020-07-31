@@ -10,10 +10,15 @@
 	</parent>
 
 	<artifactId>ipasir-cryptominisat</artifactId>
+	<version>5.7.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Native shared library for CryptoMiniSat</name>
 	<description>Native shared library for the CryptoMiniSat solver that implements the IPASIR C interface for incremental SAT solving</description>
+	
+	<properties>
+		<library.version>5.7.1</library.version>
+	</properties>
 
 	<licenses>
 		<license>
